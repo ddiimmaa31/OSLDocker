@@ -9,15 +9,7 @@ RUN go mod download
 
 RUN go build -o /server
 
-ENV HOST_NAME=localhost \
-    USER_NAME=postgres \
-    PASSWORD=postgres \
-    DB_NAME=postgres \
-    PORT=5432 \
-    GOSERVER_PORT=8080 \
-    MEMC_PATH=10.0.0.1:11211
-
-EXPOSE 8080
+EXPOSE 3000
 
 CMD [ "./server" ]
 

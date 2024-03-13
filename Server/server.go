@@ -33,30 +33,30 @@ func main() {
 		ident := r.FormValue("ident")
 		if ident == "" {
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
-			w.Write([]byte(`<form action="/" method="GET">
+			w.Write([]byte(index(`<form action="/" method="GET">
 								<input id="ident" type="text" name="ident" />
 								<input type="submit" value="Check" />
-		  					</form>`))
+		  					</form>`)))
 			return
 		}
 		if meme := CheckMeme(ident); meme != "" {
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
-			w.Write([]byte("<h>" + meme + "</h>" + home))
+			w.Write([]byte(index("<p>" + meme + "</p>" + home)))
 			return
 		}
 		s := GetFromDB(ident)
 		if s.Ident != "" {
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
-			w.Write([]byte("<h>" + s.NameSurname + "</h>" + home))
+			w.Write([]byte(index("<p>" + s.NameSurname + "</p>" + home)))
 			AddMeme(s)
 			return
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write([]byte(`<form action="/new" method="GET">
+		w.Write([]byte(index(`<form action="/new" method="GET">
 							<input id="ident" type="text" name="ident" />
 							<input id="nameSurname" type="text" name="nameSurname" />
 							<input type="submit" value="Save" />
-	  					</form>`))
+	  					</form>`)))
 	})
 
 	http.HandleFunc("/new", func(w http.ResponseWriter, r *http.Request) {
@@ -64,19 +64,19 @@ func main() {
 		nameSurname := r.FormValue("nameSurname")
 		if ident == "" || nameSurname == "" {
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
-			w.Write([]byte(`<form action="/new" method="GET">
+			w.Write([]byte(index(`<form action="/new" method="GET">
                                 <input id="ident" type="text" name="ident" />
                                 <input id="nameSurname" type="text" name="nameSurname" />
                                 <input type="submit" value="Save" />
-                            </form>`))
+                            </form>`)))
 			return
 		}
 		if err := WriteToDB(Student{Ident: ident, NameSurname: nameSurname}); err != nil {
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
-			w.Write([]byte("<h>Wrong Iednt or NameSurname</h>" + register))
+			w.Write([]byte(index("<p>Wrong Iednt or NameSurname</p>" + register)))
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write([]byte("<h>Student was successfully saved</h>" + home))
+		w.Write([]byte(index("<p>Student was successfully saved</p>" + home)))
 	})
 
 	fmt.Println(http.ListenAndServe(os.Getenv("GOSERVER_PORT"), nil))
@@ -148,4 +148,48 @@ func WriteToDB(student Student) error {
 	}
 	AddMeme(student)
 	return nil
+}
+
+func index(content string) string {
+	return fmt.Sprintf(`<!DOCTYPE html>
+	<html>
+		<head>
+			<link rel="stylesheet" href="/stiles.css" />
+			<style>
+				input {
+					margin-bottom: 1rem;
+				}
+				form {
+					text-align: center;
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					margin-top: 2rem;
+				}
+				span {
+					text-shadow: 0 0 30px #dcfeff;
+				}
+				p {
+					font-size: 2rem;
+					font-style: italic;
+				}
+				.meme {
+					font-size:12rem; font-family: Comic Sans MS, Comic Sans, cursive; color: rgb(89, 216, 216);
+				}
+				.center-wrapper {
+					text-align: center; display: flex; flex-direction: column; align-items: center;
+				}
+			</style>
+		</head>
+		<body style="background: #aae5a4;">
+			<div class="center-wrapper">
+				<div class="center-wrapper">
+					<div style="font-size: 4rem;">
+						<h4><span class="meme">Meme</span> Client</h4>
+					</div>
+					%s
+				</div>
+			</div>
+		</body>
+	</html>`, content)
 }

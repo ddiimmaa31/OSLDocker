@@ -13,9 +13,9 @@ import (
 )
 
 type Student struct {
-	Id          int
-	Ident       string
-	NameSurname string
+	Id          int    `gorm:"primaryKey;autoIncrement"`
+	Ident       string `gorm:"unique"`
+	NameSurname string `gorm:"unique"`
 }
 
 var (
@@ -25,14 +25,56 @@ var (
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Test"))
+		ident := r.FormValue("ident")
+		if ident == "" {
+			w.Write([]byte(`<form action="/" method="GET">
+								<input id="ident" type="text" name="ident" />
+								<input type="submit" value="Save" />
+		  					</form>`))
+			return
+		}
+		if meme := CheckMeme(ident); meme != "" {
+			w.Write([]byte(meme))
+			return
+		}
+		s := GetFromDB(ident)
+		if s.Ident != "" {
+			w.Write([]byte(s.NameSurname))
+			AddMeme(s)
+			return
+		}
+		w.Write([]byte(`<form action="/new" method="GET">
+							<input id="ident" type="text" name="ident" />
+							<input id="nameSurname" type="text" name="nameSurname" />
+							<input type="submit" value="Save" />
+	  					</form>`))
+	})
+
+	http.HandleFunc("/new", func(w http.ResponseWriter, r *http.Request) {
+		ident := r.FormValue("ident")
+		nameSurname := r.FormValue("nameSurname")
+		if ident == "" || nameSurname == "" {
+			w.Write([]byte(`<form action="/new" method="GET">
+                                <input id="ident" type="text" name="ident" />
+                                <input id="nameSurname" type="text" name="nameSurname" />
+                                <input type="submit" value="Save" />
+                            </form>`))
+			return
+		}
+		if WriteToDB(Student{
+			Ident:       ident,
+			NameSurname: nameSurname,
+		}) != nil {
+			w.Write([]byte("Wrong Iednt or NameSurname"))
+		}
+		w.Write([]byte("Student was successfully saved"))
 	})
 
 	fmt.Println(http.ListenAndServe(os.Getenv("GOSERVER_PORT"), nil))
 }
 
 func init() {
-	MemeClient = gmc.New("/server")
+	MemeClient = gmc.New(os.Getenv("MEMC_PATH"))
 
 	dsm := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/UTC",
 		os.Getenv("HOST_NAME"),
@@ -77,13 +119,23 @@ func AddMeme(student Student) error {
 	return nil
 }
 
-func GetFromDB(key string) string {
+func GetFromDB(key string) Student {
 	student := Student{}
 	r := DB.Where("ident = ?", key).First(&student)
 
 	if r.Error != nil {
-		return ""
+		return Student{}
 	}
 
-	return key
+	return student
+}
+
+func WriteToDB(student Student) error {
+	r := DB.Create(student)
+
+	if r.Error != nil {
+		return r.Error
+	}
+	AddMeme(student)
+	return nil
 }

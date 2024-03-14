@@ -29,12 +29,13 @@ var (
 )
 
 func main() {
+	http.Handle("/static/", http.FileServer(http.Dir("/static")))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		ident := r.FormValue("ident")
 		if ident == "" {
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.Write([]byte(index(`<form action="/" method="GET">
-								<input id="ident" type="text" name="ident" />
+								<input id="ident" type="text" name="ident" placeholder="Your pokemon id" />
 								<input type="submit" value="Check" />
 		  					</form>`)))
 			return
@@ -53,8 +54,8 @@ func main() {
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Write([]byte(index(`<form action="/new" method="GET">
-							<input id="ident" type="text" name="ident" />
-							<input id="nameSurname" type="text" name="nameSurname" />
+							<input id="ident" type="text" name="ident" placeholder="Your pokemon id" />
+							<input id="nameSurname" type="text" name="nameSurname" placeholder="Your pokemon id" />
 							<input type="submit" value="Save" />
 	  					</form>`)))
 	})
@@ -65,8 +66,8 @@ func main() {
 		if ident == "" || nameSurname == "" {
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.Write([]byte(index(`<form action="/new" method="GET">
-                                <input id="ident" type="text" name="ident" />
-                                <input id="nameSurname" type="text" name="nameSurname" />
+                                <input id="ident" type="text" name="ident" placeholder="Your pokemon id" />
+                                <input id="nameSurname" type="text" name="nameSurname" placeholder="Your pokemon id" />
                                 <input type="submit" value="Save" />
                             </form>`)))
 			return
@@ -154,7 +155,7 @@ func index(content string) string {
 	return fmt.Sprintf(`<!DOCTYPE html>
 	<html>
 		<head>
-			<link rel="stylesheet" href="/stiles.css" />
+			<link rel="stylesheet" href="/static/stiles.css" />
 			<style>
 				input {
 					margin-bottom: 1rem;
@@ -164,14 +165,10 @@ func index(content string) string {
 					display: flex;
 					flex-direction: column;
 					align-items: center;
-					margin-top: 2rem;
+					margin-top: 1rem;
 				}
 				span {
 					text-shadow: 0 0 30px #dcfeff;
-				}
-				p {
-					font-size: 2rem;
-					font-style: italic;
 				}
 				.meme {
 					font-size:12rem; font-family: Comic Sans MS, Comic Sans, cursive; color: rgb(89, 216, 216);
@@ -179,14 +176,25 @@ func index(content string) string {
 				.center-wrapper {
 					text-align: center; display: flex; flex-direction: column; align-items: center;
 				}
+				p {
+					font-size: 2rem;
+					font-style: italic;
+				}
+				img:hover {
+					rotate: 360deg;
+					transition-duration: 5s;
+					transition-delay: 1s;
+					transition-timing-function:ease-in-out;
+				}
 			</style>
 		</head>
 		<body style="background: #aae5a4;">
 			<div class="center-wrapper">
 				<div class="center-wrapper">
 					<div style="font-size: 4rem;">
-						<h4><span class="meme">Meme</span> Client</h4>
+						<h4><img src="/static/image.png" style="height: 10rem; width: 10rem;"><span class="meme">Meme</span> Client</h4>
 					</div>
+					<div class="">Here you can find, create and store your pokemons.</div>
 					%s
 				</div>
 			</div>

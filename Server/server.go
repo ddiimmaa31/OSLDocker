@@ -181,9 +181,11 @@ func index(content string) string {
 					font-style: italic;
 				}
 				img:hover {
-					rotate: 360deg;
-					transition-duration: 5s;
-					transition-delay: 1s;
+					rotate: 8deg;
+				}
+				.logo:hover {
+					transform: scale(1.2, 1.2);
+					transition-duration: 0.4s;
 					transition-timing-function:ease-in-out;
 				}
 			</style>
@@ -192,7 +194,7 @@ func index(content string) string {
 			<div class="center-wrapper">
 				<div class="center-wrapper">
 					<div style="font-size: 4rem;">
-						<h4><img src="/static/image.png" style="height: 10rem; width: 10rem;"><span class="meme">Meme</span> Client</h4>
+						<h4><img src="/static/image.png" class="logo" style="height: 10rem; width: 10rem;"><span class="meme">Meme</span> Client</h4>
 					</div>
 					<div class="">Here you can find, create and store your pokemons.</div>
 					%s

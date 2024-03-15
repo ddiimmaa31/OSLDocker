@@ -29,7 +29,7 @@ var (
 )
 
 func main() {
-	http.Handle("/static/", http.FileServer(http.Dir("/static")))
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		ident := r.FormValue("ident")
 		if ident == "" {
@@ -55,7 +55,7 @@ func main() {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Write([]byte(index(`<form action="/new" method="GET">
 							<input id="ident" type="text" name="ident" placeholder="Your pokemon id" />
-							<input id="nameSurname" type="text" name="nameSurname" placeholder="Your pokemon id" />
+							<input id="nameSurname" type="text" name="nameSurname" placeholder="Your pokemon name" />
 							<input type="submit" value="Save" />
 	  					</form>`)))
 	})
@@ -75,6 +75,7 @@ func main() {
 		if err := WriteToDB(Student{Ident: ident, NameSurname: nameSurname}); err != nil {
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.Write([]byte(index("<p>Wrong Iednt or NameSurname</p>" + register)))
+			return
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Write([]byte(index("<p>Student was successfully saved</p>" + home)))
@@ -155,7 +156,6 @@ func index(content string) string {
 	return fmt.Sprintf(`<!DOCTYPE html>
 	<html>
 		<head>
-			<link rel="stylesheet" href="/static/stiles.css" />
 			<style>
 				input {
 					margin-bottom: 1rem;

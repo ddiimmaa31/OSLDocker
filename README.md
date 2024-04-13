@@ -9,6 +9,7 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		ident := r.FormValue("ident")
+
 		if ident == "" {
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.Write([]byte(index(`<form action="/" method="GET">

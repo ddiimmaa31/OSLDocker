@@ -16,6 +16,7 @@ func main() {
 		  					</form>`)))
 			return
 		}
+
 		if meme := CheckMeme(ident); meme != "" {
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.Write([]byte(index("<p>" + meme + "</p>" + home)))
